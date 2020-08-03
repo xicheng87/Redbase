@@ -80,6 +80,14 @@ clean:
 testers: all $(TESTS)
 
 #
+# Automate tests
+#
+test:
+	./pf_test1
+	./pf_test2
+	./pf_test3
+	./rm_test_bitmap
+#
 # Libraries
 #
 $(LIBRARY_PF): $(PF_OBJECTS)

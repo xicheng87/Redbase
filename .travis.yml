@@ -1,0 +1,11 @@
+language: cpp
+os: linux
+before_install:
+  # Add the build and lib directory to hold the built obj and library files
+  - mkdir build lib
+  - cd src
+script:
+  # build all targets
+  - make
+  # run all test
+  - make test
