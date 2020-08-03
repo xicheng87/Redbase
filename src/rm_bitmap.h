@@ -19,21 +19,21 @@ class RM_Bitmap {
   // length of upper_bound(n / 8)
   RM_Bitmap(unsigned int n, char* bits); 
   
-  // Set and unset a bit, possible error case RC_BITMAP_OUTOFRANGE
+  // Set and unset a bit, possible error case RM_BITMAP_OUTOFRANGE
   RC Set(unsigned int idx);
   RC Unset(unsigned int idx);
 
   // Test a bit
   RC Test(unsigned int idx, bool& val);
 
-  // Find the first slot that is unset, possible error case RC_BITMAP_FULL
+  // Find the first slot that is unset, possible error case RM_BITMAP_FULL
   RC FindFirstUnset(unsigned int& idx);
 
  private:
   // The number of bits under management
   unsigned int len;
   // Point to the start of the char array that represents the bitmap
-  char* data;
+  unsigned char* data;
 };
 
 #endif

@@ -5,7 +5,8 @@
 
 #include "rm_bitmap.h"
 
-RM_Bitmap::RM_Bitmap(unsigned int n, char* bits) : len(n), data(bits) {}
+RM_Bitmap::RM_Bitmap(unsigned int n, char* bits) : len(n), 
+    data((unsigned char*)bits) {}
 
 RC RM_Bitmap::Set(unsigned int idx) {
   RC rc;
@@ -58,3 +59,27 @@ RC RM_Bitmap::Test(unsigned int idx, bool& val) {
   return OK_RC;
 }
 
+RC RM_Bitmap::FindFirstUnset(unsigned int& idx) {
+  RC rc;
+  unsigned int slot_num = len / 8 + (len % 8 != 0);
+  for (unsigned int i = 0; i < slot_num; i++) {
+    if (data[i] != 0xFF) {
+      // The first thing is to compute the index of the least significant 0-bit
+      // which represents the first unset bit on this 8-bit slot. Since 
+      // __builtin_ffs returns the one plus index of the least signficatn 1-bit
+      // we can compute thie via __builtin_ffs(~data[i]) - 1. 
+      unsigned int res = i * 8 + __builtin_ffs(~data[i]) - 1;
+      // Note that we can have unused bit if there is a cut off of the last
+      // char bytes, so we still need to check if res is in the currect range. 
+      // If not, then it means bitmap is full
+      if (res >= len) {
+        rc = RM_BITMAP_FULL;
+        return rc;
+      } 
+      idx = res;
+      return OK_RC;
+    }
+  }
+
+  return RM_BITMAP_FULL;
+}
