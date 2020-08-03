@@ -6,6 +6,6 @@ before_install:
   - cd src
 script:
   # build all targets
-  - make
+  - make testers
   # run all test
   - make test
