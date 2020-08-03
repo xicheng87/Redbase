@@ -98,4 +98,9 @@ public:
 //
 void RM_PrintError(RC rc);
 
+#define RM_LASTWARN              (START_RM_WARN + 0) // placeholder 
+
+#define RM_BITMAP_OUTOFRANGE     (START_RM_ERR - 0)  // bitmap out of range
+#define RM_LASTERROR             RM_BITMAP_OUTOFRANGE
+
 #endif
