@@ -115,16 +115,16 @@ void BitmapErrorTest() {
 // BitmapFindFirstUnsetTest
 //
 // Desc: Test the use of FindFirstUnset 
-void BitmapFindFirstUnsetTest(int len) {
+void BitmapFindFirstUnsetTest(unsigned int len) {
   RC rc;
-  int byteLen = len / 8 + (len % 8 != 0);
+  unsigned int byteLen = len / 8 + (len % 8 != 0);
   char* data = (char*)malloc(byteLen * sizeof(char));
   memset(data, 0, byteLen);
 
   RM_Bitmap bitmap(len, data);
 
   // Find first unset bit and then set it sequentially
-  for (int i = 0; i < len; i++) {
+  for (unsigned int i = 0; i < len; i++) {
     unsigned int firstUnsetIdx;
     if ((rc = bitmap.FindFirstUnset(firstUnsetIdx))) {
       PrintError(rc);
@@ -140,6 +140,50 @@ void BitmapFindFirstUnsetTest(int len) {
 
   unsigned int idx;
   assert(bitmap.FindFirstUnset(idx) == RM_BITMAP_FULL);
+
+  // Unset all bits
+  for (unsigned int i = 0; i < len; i++) {
+    if ((rc = bitmap.Unset(i))) {
+      PrintError(rc);
+      exit(1);
+    }
+  }
+
+  // Let's set every three-bit and then verify FindFirstUnset gives the correct
+  // bit position when walking through the bits again
+  for (unsigned int i = 0; i < len; i++) {
+    if ((i % 3 == 0) && (rc = bitmap.Set(i))) {
+      PrintError(rc);
+      exit(1);
+    }
+  }
+
+  for (unsigned int i = 0; i < len; i++) {
+    unsigned int firstUnsetIdx;
+    rc = bitmap.FindFirstUnset(firstUnsetIdx);
+    if (rc) {
+      if (rc == RM_BITMAP_FULL) {
+        // If bitmap is full, this means the total length is a multiple of 3
+        // and we are at the tail of the bitmap
+        assert(i + 1 == len && i % 3 ==0);
+      } else {
+        PrintError(rc);
+        exit(1);
+      }
+    }
+    
+    // If i is a multiple of 3 that means it has been taken so the next 
+    // available bit is i+1, otherwise i should be available
+    if (!rc) {
+      assert(firstUnsetIdx == ((i % 3 == 0) ? i + 1 : i));
+    }
+
+    // Set the i-th bit sequentially
+    if ((rc = bitmap.Set(i))) {
+      PrintError(rc);
+      exit(1);
+    }
+  }
 }
 
 int main(int argc, char* argv[]) {
@@ -150,6 +194,8 @@ int main(int argc, char* argv[]) {
   BitmapFindFirstUnsetTest(1234);
   BitmapFindFirstUnsetTest(4345);
   BitmapFindFirstUnsetTest(1 << 16);
+  // Test a case with len a multiple of 3
+  BitmapFindFirstUnsetTest(9000);
 
   return 0;
 }
